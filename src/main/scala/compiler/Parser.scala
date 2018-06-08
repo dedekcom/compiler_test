@@ -145,110 +145,113 @@ class Parser {
       pushVar(rpn.eval())
   }
 
-  def parseExpr(func: Func, codeLine: List[Token], readList: Boolean, readIf: Boolean, rpn: RPN): List[Token] = codeLine match {
-    case Nil =>
-      evalRpn(rpn)
-      Nil
+  def parseExpr(func: Func, codeLine: List[Token], readList: Boolean, readIf: Boolean, rpn: RPN): List[Token] = {
+    def proceed(restCodeLine: List[Token]) = parseExpr(func, restCodeLine, readList, readIf, rpn)
+    codeLine match {
+      case Nil =>
+        evalRpn(rpn)
+        Nil
 
-    case Op(",") :: tail if readList =>
-      evalRpn(rpn)
-      codeLine
-
-    case oppc@Op(")") :: tail =>
-      if (rpn.containsParenthesis) {
-        rpn.nextOp(")")
-        parseExpr(func, tail, readList, readIf, rpn)
-      } else if (readList) {
+      case Op(",") :: tail if readList =>
         evalRpn(rpn)
         codeLine
-      } else throw new ParserSyntaxErrorException(s"unexpected operator $oppc")
+
+      case oppc@Op(")") :: tail =>
+        if (rpn.containsParenthesis) {
+          rpn.nextOp(")")
+          parseExpr(func, tail, readList, readIf, rpn)
+        } else if (readList) {
+          evalRpn(rpn)
+          codeLine
+        } else throw new ParserSyntaxErrorException(s"unexpected operator $oppc")
 
 
-    case Op("(") :: tail =>
-      rpn.nextOp("(")
-      parseExpr(func, tail, readList, readIf, rpn)
+      case Op("(") :: tail =>
+        rpn.nextOp("(")
+        parseExpr(func, tail, readList, readIf, rpn)
 
-    case Op(":") :: tail if readIf =>
-      evalRpn(rpn)
-      codeLine
+      case Op(":") :: tail if readIf =>
+        evalRpn(rpn)
+        codeLine
 
-    case Ident(funcName) :: Op("(") :: Op(")") :: tail =>
-      parseFunc(funcName)
-      tail
+      case Ident(funcName) :: Op("(") :: Op(")") :: tail =>
+        parseFunc(funcName)
+        tail
 
-    case Ident(funcName) :: Op("(") :: tail =>
-      val restCode = parseFuncArgs(func, tail, readArg = true)
-      funcName match {
-        case "println" => println(popVar().get)
-        case rest =>      parseFunc(rest)
-      }
-      restCode
+      case Ident(funcName) :: Op("(") :: tail =>
+        val restCode = parseFuncArgs(func, tail, readArg = true)
+        funcName match {
+          case "println" => println(popVar().get)
+          case rest =>      parseFunc(rest)
+        }
+        restCode
 
-    case NumInt(i) :: tail =>
-      rpn.nextVar(i.toInt)
-      parseExpr(func, tail, readList, readIf, rpn)
+      case NumInt(i) :: tail =>
+        rpn.nextVar(i.toInt)
+        proceed(tail)
 
-    case NumReal(r) :: tail =>
-      rpn.nextVar(r.toDouble)
-      parseExpr(func, tail, readList, readIf, rpn)
+      case NumReal(r) :: tail =>
+        rpn.nextVar(r.toDouble)
+        proceed(tail)
 
-    case Literal(s) :: tail =>
-      rpn.nextVar(s)
-      parseExpr(func, tail, readList, readIf, rpn)
+      case Literal(s) :: tail =>
+        rpn.nextVar(s)
+        proceed(tail)
 
-    case Ident(name) :: tail =>
-      rpn.nextVar(func.getVar(name).get)
-      parseExpr(func, tail, readList, readIf, rpn)
+      case Ident(name) :: tail =>
+        rpn.nextVar(func.getVar(name).get)
+        proceed(tail)
 
-    case Op("+") :: tail =>
-      rpn.nextOp("+")
-      parseExpr(func, tail, readList, readIf, rpn)
+      case Op("+") :: tail =>
+        rpn.nextOp("+")
+        proceed(tail)
 
-    case Op("-") :: tail =>
-      rpn.nextOp("-")
-      parseExpr(func, tail, readList, readIf, rpn)
+      case Op("-") :: tail =>
+        rpn.nextOp("-")
+        proceed(tail)
 
-    case Op("*") :: tail =>
-      rpn.nextOp("*")
-      parseExpr(func, tail, readList, readIf, rpn)
+      case Op("*") :: tail =>
+        rpn.nextOp("*")
+        proceed(tail)
 
-    case Op("/") :: tail =>
-      rpn.nextOp("/")
-      parseExpr(func, tail, readList, readIf, rpn)
+      case Op("/") :: tail =>
+        rpn.nextOp("/")
+        proceed(tail)
 
-    case Op("==") :: tail =>
-      rpn.nextOp("==")
-      parseExpr(func, tail, readList, readIf, rpn)
+      case Op("==") :: tail =>
+        rpn.nextOp("==")
+        proceed(tail)
 
-    case Op("!=") :: tail =>
-      rpn.nextOp("!=")
-      parseExpr(func, tail, readList, readIf, rpn)
+      case Op("!=") :: tail =>
+        rpn.nextOp("!=")
+        proceed(tail)
 
-    case Op(">=") :: tail =>
-      rpn.nextOp(">=")
-      parseExpr(func, tail, readList, readIf, rpn)
+      case Op(">=") :: tail =>
+        rpn.nextOp(">=")
+        proceed(tail)
 
-    case Op(">") :: tail =>
-      rpn.nextOp(">")
-      parseExpr(func, tail, readList, readIf, rpn)
+      case Op(">") :: tail =>
+        rpn.nextOp(">")
+        proceed(tail)
 
-    case Op("<=") :: tail =>
-      rpn.nextOp("<=")
-      parseExpr(func, tail, readList, readIf, rpn)
+      case Op("<=") :: tail =>
+        rpn.nextOp("<=")
+        proceed(tail)
 
-    case Op("<") :: tail =>
-      rpn.nextOp("<")
-      parseExpr(func, tail, readList, readIf, rpn)
+      case Op("<") :: tail =>
+        rpn.nextOp("<")
+        proceed(tail)
 
-    case Op("&&") :: tail =>
-      rpn.nextOp("&&")
-      parseExpr(func, tail, readList, readIf, rpn)
+      case Op("&&") :: tail =>
+        rpn.nextOp("&&")
+        proceed(tail)
 
-    case Op("||") :: tail =>
-      rpn.nextOp("||")
-      parseExpr(func, tail, readList, readIf, rpn)
+      case Op("||") :: tail =>
+        rpn.nextOp("||")
+        proceed(tail)
 
-    case any => throw new ParserSyntaxErrorException(s"parse expr $any" )
+      case any => throw new ParserSyntaxErrorException(s"parse expr $any" )
+    }
   }
 
   def parseFuncArgs(func: Func, codeLine: List[Token], readArg: Boolean): List[Token] = codeLine match {
