@@ -1,0 +1,19 @@
+
+
+/*
+    code 1 test
+*/
+
+func fibo(first, second, n):
+    if n <= 0:
+        second
+    else:
+        println("n=" + n + " is " + second)
+        fibo(second, first+second, n-1)
+    endif
+end
+
+func main():
+    val f = fibo(1, 1, 5)
+    println("fibo for 5 is " + f)
+end

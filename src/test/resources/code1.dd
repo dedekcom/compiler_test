@@ -1,0 +1,13 @@
+
+
+/*
+    code 1 test
+*/
+
+func fibo(first, second, n):
+    if n <= 0:
+        first
+    else:
+        fibo(second, first+second, n-1)
+    endif
+end
