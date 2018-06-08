@@ -3,6 +3,9 @@ package compiler.eval
 import scala.collection.mutable
 import RPN.{OutRpn, RPNEvalException, RpnOp, RpnVar}
 
+/**
+  * Reverse Polish Notation
+  */
 object RPN {
 
   trait OutRpn
@@ -74,18 +77,18 @@ class RPN {
   }
 
   def next(e: String): Unit = e match {
-    case "+" => nextOp("+")
-    case "-" => nextOp("-")
-    case "*" => nextOp("*")
-    case "/" => nextOp("/")
+    case "+"  => nextOp("+")
+    case "-"  => nextOp("-")
+    case "*"  => nextOp("*")
+    case "/"  => nextOp("/")
     case "==" => nextOp("==")
     case "<=" => nextOp("<=")
     case ">=" => nextOp(">=")
     case "!=" => nextOp("!=")
-    case "<" => nextOp("<")
-    case ">" => nextOp(">")
-    case "(" => nextOp("(")
-    case ")" => nextOp(")")
+    case "<"  => nextOp("<")
+    case ">"  => nextOp(">")
+    case "("  => nextOp("(")
+    case ")"  => nextOp(")")
     case "||" => nextOp("||")
     case "&&" => nextOp("&&")
     case i if i.matches("[0-9]+") => nextVar(i.toInt)
@@ -104,19 +107,19 @@ class RPN {
     flushOpStack()
     output.foldLeft(List[Variable]())(
       (list, token) => (list, token) match {
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("*")) => y.mul(x) :: tail
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("/")) => y.div(x) :: tail
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("+")) => y.add(x) :: tail
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("-")) => y.sub(x) :: tail
+        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("*"))  => y.mul(x) :: tail
+        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("/"))  => y.div(x) :: tail
+        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("+"))  => y.add(x) :: tail
+        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("-"))  => y.sub(x) :: tail
         case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("==")) => RpnVar(y.eq(x)) :: tail
         case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("!=")) => RpnVar(y.neq(x)) :: tail
         case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("<=")) => RpnVar(y.lte(x)) :: tail
         case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp(">=")) => RpnVar(y.gte(x)) :: tail
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("<")) => RpnVar(y.lt(x)) :: tail
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp(">")) => RpnVar(y.gt(x)) :: tail
+        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("<"))  => RpnVar(y.lt(x)) :: tail
+        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp(">"))  => RpnVar(y.gt(x)) :: tail
         case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("&&")) => RpnVar(y.and(x)) :: tail
         case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("||")) => RpnVar(y.or(x)) :: tail
-        case (_, v: RpnVar) => v :: list
+        case ( _, v: RpnVar) => v :: list
         case _ => throw new RPNEvalException(s"token=$token, list=${list.toString()}")
       }).head.get
   }

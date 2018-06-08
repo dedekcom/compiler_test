@@ -13,12 +13,33 @@ object Parser {
   class ParserMissingKeyWordEndException(msg: String) extends Exception(msg)
 }
 
+/**
+  * Parser evaluates code scanned by Lexer
+  */
 class Parser {
   var funcs: Map[String, Func] = Map()
   var code: IndexedSeq[List[Token]] = Array[List[Token]]()
   var varsStack: List[Variable] = List()
 
-  def parse(lines: List[List[Token]]): Unit = {
+  /**
+    * Run code from file
+    * code must contain 'main' function without arguments
+    * @param filename name of file with code
+    */
+  def execute(filename: String): Unit = execute(Source.fromResource(filename))
+
+  def execute(src: BufferedSource): Unit = {
+    val lines = SrcTransformer( src )
+    Lexer.tryScan(lines) match {
+      case Success(codeLines) =>
+        execute(codeLines)
+
+      case Failure(ex) =>
+        println(s"Lexer Exception ${ex.getMessage}")
+    }
+  }
+
+  def execute(lines: List[List[Token]]): Unit = {
     code = lines.toIndexedSeq
     funcs = code.foldLeft((Map[String, Func](), 0)) { (acc, el) => el match {
         case KWFUNC :: Ident(name) :: tail => (acc._1.updated(name, new Func(name, acc._2)), acc._2 + 1)
@@ -28,7 +49,7 @@ class Parser {
     parseFunc("main")
   }
 
-  def parseFunc(funcName: String): Unit = {
+  private def parseFunc(funcName: String): Unit = {
     funcs.get(funcName) match {
       case Some(func) =>
         code(func.start) match {
@@ -42,18 +63,18 @@ class Parser {
     }
   }
 
-  def popVar(): Variable = {
+  private def popVar(): Variable = {
     val v = varsStack.head
     varsStack = varsStack.tail
     v
   }
 
-  def pushVar(v: Any): Unit = v match {
+  private def pushVar(v: Any): Unit = v match {
     case variable: Variable => varsStack = variable :: varsStack
     case any => varsStack = new Variable(any) :: varsStack
   }
 
-  def scanFuncArgs(func: Func, codeLine: List[Token], readArg: Boolean): Unit = codeLine match {
+  private def scanFuncArgs(func: Func, codeLine: List[Token], readArg: Boolean): Unit = codeLine match {
     case Op(")") :: Op(":") :: Nil if !readArg =>
       def popFuncVars(): Unit = func.popVar() match {
         case Some(v) =>
@@ -75,9 +96,9 @@ class Parser {
     case any => throw new ParserSyntaxErrorException(s"scan func ${func.name} args $any" )
   }
 
-  case class IfBlock(justCount: Boolean, evalIfOrElse: Boolean)
+  private case class IfBlock(justCount: Boolean, evalIfOrElse: Boolean)
 
-  def parseBody(func: Func, idCodeLine: Int, codeLine: List[Token], ifs: List[IfBlock]): Unit = {
+  private def parseBody(func: Func, idCodeLine: Int, codeLine: List[Token], ifs: List[IfBlock]): Unit = {
     def process: Boolean = ifs.isEmpty || (!ifs.head.justCount && ifs.head.evalIfOrElse)
     codeLine match {
       case KWVAL :: Ident(valName) :: Op("=") :: tail =>
@@ -133,19 +154,19 @@ class Parser {
     }
   }
 
-  def parseNextLine(func: Func, idCodeLine: Int, ifs: List[IfBlock]): Unit = {
+  private def parseNextLine(func: Func, idCodeLine: Int, ifs: List[IfBlock]): Unit = {
     if (idCodeLine+1 < code.length)
       parseBody(func, idCodeLine + 1, code(idCodeLine + 1), ifs)
     else
       throw new ParserMissingKeyWordEndException(func.name)
   }
 
-  def evalRpn(rpn: RPN): Unit = {
+  private def evalRpn(rpn: RPN): Unit = {
     if (rpn.nonEmpty)
       pushVar(rpn.eval())
   }
 
-  def parseExpr(func: Func, codeLine: List[Token], readList: Boolean, readIf: Boolean, rpn: RPN): List[Token] = {
+  private def parseExpr(func: Func, codeLine: List[Token], readList: Boolean, readIf: Boolean, rpn: RPN): List[Token] = {
     def proceed(restCodeLine: List[Token]) = parseExpr(func, restCodeLine, readList, readIf, rpn)
     codeLine match {
       case Nil =>  evalRpn(rpn);   Nil
@@ -197,7 +218,7 @@ class Parser {
     }
   }
 
-  def parseFuncArgs(func: Func, codeLine: List[Token], readArg: Boolean): List[Token] = codeLine match {
+  private def parseFuncArgs(func: Func, codeLine: List[Token], readArg: Boolean): List[Token] = codeLine match {
     case Op(")") :: tail if !readArg =>
       tail
 
@@ -210,18 +231,5 @@ class Parser {
 
     case rest => throw new ParserSyntaxErrorException(s"parse func args $rest" )
   }
-
-  def execute(src: BufferedSource): Unit = {
-    val lines = SrcTransformer( src )
-    Lexer.tryScan(lines) match {
-      case Success(codeLines) =>
-        parse(codeLines)
-
-      case Failure(ex) =>
-        println(s"Lexer Exception ${ex.getMessage}")
-    }
-  }
-
-  def execute(filename: String): Unit = execute(Source.fromResource(filename))
 
 }
