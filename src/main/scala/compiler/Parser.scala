@@ -21,6 +21,9 @@ class Parser {
   var code: IndexedSeq[List[Token]] = Array[List[Token]]()
   var varsStack: List[Variable] = List()
 
+  val supportedOperators: Set[String] = Set("+", "-", "*", "/", "==", "!=", "<=", ">=",
+    "<", ">", "||", "&&", "(", ")")
+
   /**
     * Run code from file
     * code must contain 'main' function without arguments
@@ -200,30 +203,16 @@ class Parser {
 
       case Ident(name) :: tail =>  rpn.nextVar(func.getVar(name).get);   proceed(tail)
 
-      case Op("(")  :: tail =>  rpn.nextOp("(");   proceed(tail)
-      case Op("+")  :: tail =>  rpn.nextOp("+");   proceed(tail)
-      case Op("-")  :: tail =>  rpn.nextOp("-");   proceed(tail)
-      case Op("*")  :: tail =>  rpn.nextOp("*");   proceed(tail)
-      case Op("/")  :: tail =>  rpn.nextOp("/");   proceed(tail)
-      case Op("==") :: tail =>  rpn.nextOp("==");  proceed(tail)
-      case Op("!=") :: tail =>  rpn.nextOp("!=");  proceed(tail)
-      case Op(">=") :: tail =>  rpn.nextOp(">=");  proceed(tail)
-      case Op(">")  :: tail =>  rpn.nextOp(">");   proceed(tail)
-      case Op("<=") :: tail =>  rpn.nextOp("<=");  proceed(tail)
-      case Op("<")  :: tail =>  rpn.nextOp("<");   proceed(tail)
-      case Op("&&") :: tail =>  rpn.nextOp("&&");  proceed(tail)
-      case Op("||") :: tail =>  rpn.nextOp("||");  proceed(tail)
+      case Op(op)  :: tail if supportedOperators.contains(op) =>  rpn.nextOp(op);   proceed(tail)
 
       case any => throw new ParserSyntaxErrorException(s"parse expr $any" )
     }
   }
 
   private def parseFuncArgs(func: Func, codeLine: List[Token], readArg: Boolean): List[Token] = codeLine match {
-    case Op(")") :: tail if !readArg =>
-      tail
+    case Op(")") :: tail if !readArg =>      tail
 
-    case Op(",") :: tail if !readArg =>
-      parseFuncArgs(func, tail, readArg = true)
+    case Op(",") :: tail if !readArg =>      parseFuncArgs(func, tail, readArg = true)
 
     case any if readArg =>
       val restCode = parseExpr(func, any, readList = true, readIf = false, new RPN())
