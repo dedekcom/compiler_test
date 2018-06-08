@@ -23,6 +23,6 @@ func fibo(first, second, n):
 end
 
 func main():
-    val f = fibo(1, 1, 5)
+    val f = fibo((1), (((1+0))), 5)
     println("fibo for 5 is " + f)
 end
