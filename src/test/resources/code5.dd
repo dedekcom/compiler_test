@@ -13,8 +13,8 @@ func fiboRec(first, second, n):
 end
 
 func fibo(n):
+    println("compute fibo for "+n)
     fiboRec(1, 1, n)
-    println("calculated fibo for "+n)
 end
 
 func printfib(msg, v):
