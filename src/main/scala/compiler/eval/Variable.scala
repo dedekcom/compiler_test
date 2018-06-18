@@ -6,6 +6,9 @@ object Variable {
   class VariableNotSupportedTypeException(msg: String) extends Exception(msg)
   class VariableNotSupportedOperationException(msg: String) extends Exception(msg)
 
+  def apply(v: Any): Variable = {
+    new Variable().set(v)
+  }
 }
 
 class Variable {

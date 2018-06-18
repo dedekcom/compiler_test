@@ -73,7 +73,7 @@ class Parser {
 
   private def pushVar(v: Any): Unit = v match {
     case variable: Variable => varsStack = variable :: varsStack
-    case any => varsStack = new Variable().set(v) :: varsStack
+    case any => varsStack = Variable(v) :: varsStack
   }
 
   private def scanFuncListArgs(func: Func,  idCodeLine: Int, codeLine: List[Token]): Unit = {
