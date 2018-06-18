@@ -17,7 +17,7 @@ func fibo(first, second, n):
         endif
         second
     else:
-        println("n=" + n + " is " + second)
+        //println("n=" + n + " is " + second)
         fibo(second, first+second, n-1)
     endif
 end
