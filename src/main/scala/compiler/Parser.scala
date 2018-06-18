@@ -15,8 +15,8 @@ object Parser {
 }
 
 class Parser {
-  var funcs: Map[String, Func] = Map()
-  var code: IndexedSeq[List[Token]] = Array[List[Token]]()
+  var funcs: Map[String, Func] = _
+  var code: IndexedSeq[List[Token]] = _
   var varsStack: List[Variable] = List()
 
   /**
