@@ -1,0 +1,27 @@
+
+
+/*
+    code 5 test
+*/
+
+func fiboRec(first, second, n):
+    if n <= 0:
+        second
+    else:
+        fiboRec(second, first+second, n-1)
+    endif
+end
+
+func fibo(n):
+    fiboRec(1, 1, n)
+    println("calculated fibo for "+n)
+end
+
+func printfib(msg, v):
+    println(msg + ": " + v)
+end
+
+func main():
+    println("starting main")
+    printfib("value of rec fibo + 1 is ", fibo(fibo(5)-1)+1)
+end

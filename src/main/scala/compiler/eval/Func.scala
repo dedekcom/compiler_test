@@ -14,7 +14,7 @@ class Func(val name: String, val start: Int) {
   }
 
   def newVar(name: String): Unit = {
-    val v = new Variable(name)
+    val v = new Variable
     vars = vars.updated(name, v)
   }
 

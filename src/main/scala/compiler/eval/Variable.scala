@@ -8,7 +8,8 @@ object Variable {
 
 }
 
-class Variable(var variable: Any) {
+class Variable {
+  var variable: Any = _
 
   def set(v: Any): Variable = v match {
     case vr: Variable => set(vr.get)
