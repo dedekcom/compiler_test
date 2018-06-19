@@ -95,18 +95,18 @@ class RPN {
     flushOpStack()
     output.foldLeft(List[Variable]())(
       (list, token) => (list, token) match {
-        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("*"))  => y.mul(x) :: tail
-        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("/"))  => y.div(x) :: tail
-        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("+"))  => y.add(x) :: tail
-        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("-"))  => y.sub(x) :: tail
-        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("==")) => Variable(y.eq(x)) :: tail
-        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("!=")) => Variable(y.neq(x)) :: tail
-        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("<=")) => Variable(y.lte(x)) :: tail
-        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp(">=")) => Variable(y.gte(x)) :: tail
-        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("<"))  => Variable(y.lt(x)) :: tail
-        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp(">"))  => Variable(y.gt(x)) :: tail
-        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("&&")) => Variable(y.and(x)) :: tail
-        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("||")) => Variable(y.or(x)) :: tail
+        case ( x :: y :: tail, RpnOp("*"))  => y.mul(x) :: tail
+        case ( x :: y :: tail, RpnOp("/"))  => y.div(x) :: tail
+        case ( x :: y :: tail, RpnOp("+"))  => y.add(x) :: tail
+        case ( x :: y :: tail, RpnOp("-"))  => y.sub(x) :: tail
+        case ( x :: y :: tail, RpnOp("==")) => Variable(y.eq(x)) :: tail
+        case ( x :: y :: tail, RpnOp("!=")) => Variable(y.neq(x)) :: tail
+        case ( x :: y :: tail, RpnOp("<=")) => Variable(y.lte(x)) :: tail
+        case ( x :: y :: tail, RpnOp(">=")) => Variable(y.gte(x)) :: tail
+        case ( x :: y :: tail, RpnOp("<"))  => Variable(y.lt(x)) :: tail
+        case ( x :: y :: tail, RpnOp(">"))  => Variable(y.gt(x)) :: tail
+        case ( x :: y :: tail, RpnOp("&&")) => Variable(y.and(x)) :: tail
+        case ( x :: y :: tail, RpnOp("||")) => Variable(y.or(x)) :: tail
         case ( _, v: Variable) => v :: list
         case _ => throw new RPNEvalException(s"token=$token, list=${list.toString()}")
       }).head.get
