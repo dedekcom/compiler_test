@@ -9,9 +9,7 @@ import RPN.{OutRpn, RPNEvalException, RpnOp, RpnVar}
 object RPN {
 
   trait OutRpn
-  case class RpnVar(vr: Any) extends Variable with OutRpn {
-    set(vr)
-  }
+  case class RpnVar(vr: Any) extends Variable with OutRpn {    set(vr)  }
   case class RpnOp(op: String) extends OutRpn
 
   class RPNEvalException(msg: String) extends Exception(msg)
@@ -97,19 +95,19 @@ class RPN {
     flushOpStack()
     output.foldLeft(List[Variable]())(
       (list, token) => (list, token) match {
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("*"))  => y.mul(x) :: tail
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("/"))  => y.div(x) :: tail
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("+"))  => y.add(x) :: tail
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("-"))  => y.sub(x) :: tail
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("==")) => RpnVar(y.eq(x)) :: tail
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("!=")) => RpnVar(y.neq(x)) :: tail
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("<=")) => RpnVar(y.lte(x)) :: tail
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp(">=")) => RpnVar(y.gte(x)) :: tail
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("<"))  => RpnVar(y.lt(x)) :: tail
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp(">"))  => RpnVar(y.gt(x)) :: tail
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("&&")) => RpnVar(y.and(x)) :: tail
-        case ( (x: RpnVar) :: (y: RpnVar) :: tail, RpnOp("||")) => RpnVar(y.or(x)) :: tail
-        case ( _, v: RpnVar) => v :: list
+        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("*"))  => y.mul(x) :: tail
+        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("/"))  => y.div(x) :: tail
+        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("+"))  => y.add(x) :: tail
+        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("-"))  => y.sub(x) :: tail
+        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("==")) => Variable(y.eq(x)) :: tail
+        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("!=")) => Variable(y.neq(x)) :: tail
+        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("<=")) => Variable(y.lte(x)) :: tail
+        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp(">=")) => Variable(y.gte(x)) :: tail
+        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("<"))  => Variable(y.lt(x)) :: tail
+        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp(">"))  => Variable(y.gt(x)) :: tail
+        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("&&")) => Variable(y.and(x)) :: tail
+        case ( (x: Variable) :: (y: Variable) :: tail, RpnOp("||")) => Variable(y.or(x)) :: tail
+        case ( _, v: Variable) => v :: list
         case _ => throw new RPNEvalException(s"token=$token, list=${list.toString()}")
       }).head.get
   }
