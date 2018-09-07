@@ -62,6 +62,7 @@ object Lexer {
 
   private def nextCodeLine(code: List[List[Token]]): List[List[Token]] = List() :: code
 
+  @tailrec
   private def scanInt(number: String, line: String): (String, NumInt) = line match {
     case "" => ("", NumInt( number ))
     case _ => line.charAt(0) match {
@@ -71,6 +72,7 @@ object Lexer {
     }
   }
 
+  @tailrec
   private def scanIdent(id: String, line: String): (String, String) = line match {
     case "" => ("", id)
     case _ => line.charAt(0) match {
@@ -80,6 +82,7 @@ object Lexer {
     }
   }
 
+  @tailrec
   private def scanReal(number: String, line: String): (String, NumReal) = line match {
     case "" => ("", NumReal( number ))
     case _ => line.charAt(0) match {
@@ -91,6 +94,7 @@ object Lexer {
     }
   }
 
+  @tailrec
   private def scanOperator(op: String, line: String): (String, Op) = line match {
     case "" => ("", Op( validateOperator(op) ))
     case _ => line.charAt(0) match {
@@ -115,6 +119,7 @@ object Lexer {
 
   private def isEmptyChar(ch: Char) = ch == ' ' || ch == '\t' || ch == '\r'
 
+  @tailrec
   def scanComment(txt: List[String]): List[String] = txt match {
     case List() => throw new LexerException("comment not closed")
     case h::tail => h match {
@@ -124,6 +129,7 @@ object Lexer {
     }
   }
 
+  @tailrec
   def scanLiteral(line: String, literal: String): (String, String) = line match {
     case "" => throw new LexerException("literal not closed")
     case CharDoubleQuotePat() => ( pop(line, "\""), literal)

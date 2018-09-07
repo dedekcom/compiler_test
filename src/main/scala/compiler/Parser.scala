@@ -3,8 +3,6 @@ package compiler
 import Tokens._
 import compiler.eval.{Func, RPN, Variable}
 
-import scala.io.{BufferedSource, Source}
-import scala.util.{Failure, Success}
 import Parser.{ParserSyntaxErrorException, supportedOperators}
 
 object Parser {
@@ -14,36 +12,10 @@ object Parser {
     "<", ">", "||", "&&", "(", ")")
 }
 
-class Parser {
-  var funcs: Map[String, Func] = _
-  var code: IndexedSeq[List[Token]] = _
+class Parser(code: IndexedSeq[List[Token]], val funcs: Map[String, Func]) {
   var varsStack: List[Variable] = List()
 
-  /**
-    * Run code from file
-    * code must contain 'main' function without arguments
-    * @param filename name of file with code
-    */
-  def execute(filename: String): Unit = execute(Source.fromResource(filename))
-
-  def execute(src: BufferedSource): Unit = {
-    val lines = SrcTransformer( src )
-    Lexer.tryScan(lines) match {
-      case Success(codeLines) =>
-        execute(codeLines)
-
-      case Failure(ex) =>
-        println(s"Lexer Exception ${ex.getMessage}")
-    }
-  }
-
-  def execute(lines: List[List[Token]]): Unit = {
-    code = lines.toIndexedSeq
-    funcs = code.foldLeft((Map[String, Func](), 0)) { (acc, el) => el match {
-      case KWFUNC :: Ident(name) :: tail => (acc._1.updated(name, new Func(name, acc._2)), acc._2 + 1)
-      case _ => (acc._1, acc._2 + 1)
-    }
-    }._1
+  def execute(): Unit = {
     parseFunc("main")
   }
 
